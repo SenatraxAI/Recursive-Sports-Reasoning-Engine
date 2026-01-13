@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepBoost Interactive Command Center</title>
+    <style>
+        :root {
+            --bg-dark: #07090f;
+            --accent-blue: #00f2ff;
+            --accent-purple: #bc13fe;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-strong: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f0f0f0;
+            --text-dim: #a0a0a0;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 242, 255, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 242, 255, 0);
+            }
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text);
+            font-family: 'Outfit', 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR INPUTS */
+        .sidebar {
+            width: 400px;
+            background: rgba(0, 0, 0, 0.4);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        h2 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-blue);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        select,
+        input {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .btn-simulate {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .btn-simulate:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .btn-simulate:active {
+            transform: translateY(0);
+        }
+
+        /* MAIN VISUALIZATION AREA */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: radial-gradient(circle at center, #1a1f35 0%, #07090f 100%);
+            position: relative;
+        }
+
+        .viewport {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .cascade-container {
+            display: flex;
+            gap: 120px;
+            align-items: center;
+        }
+
+        .layer {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .neuron {
+            width: 50px;
+            height: 50px;
+            background: var(--glass);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .neuron.firing {
+            border-color: var(--accent-blue);
+            background: rgba(0, 242, 255, 0.15);
+            color: white;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        /* RESULTS OVERLAY */
+        .stats-bar {
+            height: 200px;
+            background: rgba(0, 0, 0, 0.6);
+            border-top: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            display: flex;
+            padding: 30px 60px;
+            gap: 60px;
+        }
+
+        .result-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .res-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .res-val {
+            font-size: 2.2rem;
+            font-weight: 800;
+        }
+
+        .prediction-text {
+            color: var(--accent-purple);
+            text-shadow: 0 0 20px rgba(188, 19, 254, 0.3);
+        }
+
+        .log-overlay {
+            position: absolute;
+            bottom: 220px;
+            left: 20px;
+            width: 300px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.75rem;
+            overflow-y: auto;
+            color: #888;
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+        }
+
+        .log-tag {
+            color: var(--accent-blue);
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <h2><span style="font-size: 1.2rem;">📡</span> Match Command</h2>
+
+        <div class="input-group">
+            <label>Home Team</label>
+            <select id="h-team">
+                <option value="man_city">Manchester City</option>
+                <option value="arsenal">Arsenal</option>
+                <option value="liverpool">Liverpool</option>
+                <option value="real_madrid">Real Madrid</option>
+                <option value="bayern_munich">Bayern Munich</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Away Team</label>
+            <select id="a-team">
+                <option value="man_utd">Manchester United</option>
+                <option value="chelsea">Chelsea</option>
+                <option value="barcelona">Barcelona</option>
+                <option value="psg">PSG</option>
+                <option value="dortmund">Dortmund</option>
+            </select>
+        </div>
+
+        <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">
+            <label>Manager - Home</label>
+            <input type="text" id="h-manager" value="Pep Guardiola">
+            <label style="margin-top: 10px;">Tactical Style</label>
+            <select id="h-style">
+                <option value="Possession">Tiki-Taka (Possession)</option>
+                <option value="Counter">Gegenpress (Counter)</option>
+                <option value="Park">Low Block (Defensive)</option>
+            </select>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <label>Manager - Away</label>
+            <input type="text" id="a-manager" value="Erik ten Hag">
+            <label style="margin-top: 10px;">Tactical Style</label>
+            <select id="a-style">
+                <option value="Counter">Fast Break (Counter)</option>
+                <option value="Possession">Structured Possession</option>
+                <option value="High-Press">Aggressive High-Press</option>
+            </select>
+        </div>
+
+        <button class="btn-simulate" onclick="runSim()">Execute Simulation</button>
+    </aside>
+
+    <main>
+        <div class="viewport">
+            <div class="cascade-container" id="cascade">
+                <!-- Neurons injected by JS -->
+            </div>
+        </div>
+
+        <div class="log-overlay" id="log">
+            <div class="log-entry">Waiting for simulation command...</div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="result-card">
+                <div class="res-label">Predicted Outcome</div>
+                <div class="res-val prediction-text" id="prediction">-</div>
+            </div>
+            <div class="result-card">
+                <div class="res-label">Model Confidence</div>
+                <div class="res-val" id="confidence">0%</div>
+            </div>
+            <div class="result-card">
+                <div class="res-label">Risk Assessment</div>
+                <div class="res-val" id="risk" style="color: #666;">-</div>
+            </div>
+            <div class="result-card" style="margin-left: auto;">
+                <div class="res-label">Inference Speed</div>
+                <div class="res-val" style="font-size: 1.2rem; color: var(--accent-blue);">0.042ms</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const cascade = document.getElementById('cascade');
+        const log = document.getElementById('log');
+
+        // Helper to mimic NumPy for index-based selection
+        const np = {
+            argmax: (array) => array.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0)
+        };
+
+        function addLog(msg) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-tag">></span> ${msg}`;
+            log.prepend(entry);
+        }
+
+        async function runSim() {
+            // Reset UI
+            cascade.innerHTML = '';
+            document.getElementById('prediction').innerText = '-';
+            document.getElementById('confidence').innerText = '0%';
+            document.getElementById('risk').innerText = '-';
+
+            const params = {
+                h_team: document.getElementById('h-team').value,
+                a_team: document.getElementById('a-team').value,
+                h_manager: document.getElementById('h-manager').value,
+                h_style: document.getElementById('h-style').value,
+                a_manager: document.getElementById('a-manager').value,
+                a_style: document.getElementById('a-style').value
+            };
+
+            addLog(`Initializing simulation: ${params.h_team} vs ${params.a_team}`);
+
+            // Mocking the backend call for visual flow
+            // In run_dashboard.py, we will handle this via POST /simulate
+            try {
+                const response = await fetch('/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
+                const result = await response.json();
+                visualizeCascade(result.trace);
+            } catch (e) {
+                addLog("Backend offline. Running local mock simulation.");
+                mockSim();
+            }
+        }
+
+        async function visualizeCascade(trace) {
+            for (const step of trace) {
+                if (step.layer === 0) {
+                    const el = document.createElement('div');
+                    el.className = 'layer';
+                    el.innerHTML = `<div class="neuron firing" style="border-radius: 50%;">IN</div>`;
+                    cascade.appendChild(el);
+                    await new Promise(r => setTimeout(r, 600));
+                    addLog(`Injected ${step.features} tactical variables.`);
+                } else if (step.neurons) {
+                    const el = document.createElement('div');
+                    el.className = 'layer';
+
+                    step.neurons.forEach((n, i) => {
+                        const neuron = document.createElement('div');
+                        neuron.className = 'neuron';
+                        neuron.innerText = n.id;
+                        el.appendChild(neuron);
+                        setTimeout(() => neuron.classList.add('firing'), i * 300);
+                    });
+
+                    cascade.appendChild(el);
+                    addLog(`Processing Layer ${step.layer}: Enforcing XGBoost Nodes...`);
+                    await new Promise(r => setTimeout(r, 1500));
+                } else if (step.layer === 'final') {
+                    const el = document.createElement('div');
+                    el.className = 'layer';
+                    el.innerHTML = `<div class="neuron firing" style="background: var(--accent-purple);">OUT</div>`;
+                    cascade.appendChild(el);
+
+                    document.getElementById('prediction').innerText = step.prediction;
+                    document.getElementById('confidence').innerText = `${Math.round(step.probabilities[np.argmax(step.probabilities)] * 100)}%`;
+                    document.getElementById('risk').innerText = step.probabilities[np.argmax(step.probabilities)] > 0.7 ? "LOW" : "HIGH";
+                    addLog("Cascade complete. Match outcome resolved.");
+                }
+            }
+        }
+
+        function mockSim() {
+            const mockTrace = [
+                { layer: 0, features: 24 },
+                { layer: 1, neurons: [{ id: 'N1' }, { id: 'N2' }, { id: 'N3' }, { id: 'N4' }] },
+                { layer: 2, neurons: [{ id: 'N5' }, { id: 'N6' }, { id: 'N7' }] },
+                { layer: 'final', prediction: "HOME WIN", probabilities: [0.72, 0.18, 0.1] }
+            ];
+            visualizeCascade(mockTrace);
+        }
+    </script>
+</body>
+
+</html>

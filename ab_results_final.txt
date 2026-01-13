@@ -1,0 +1,10 @@
+DEBUG: Columns in full_matrix: ['id_x', 'goals_x', 'own_goals', 'shots_x', 'xG_x', 'time_x', 'player_id', 'team_id', 'position_x', 'player_x', 'h_a', 'yellow_card', 'red_card', 'roster_in', 'roster_out', 'key_passes_x', 'assists_x', 'xA_x', 'xGChain_x', 'xGBuildup_x']
+
+======================================================================
+POSITION   | MAE A (Std)  | MAE B (Eff)  | IMPROVEMENT
+======================================================================
+GK         | 0.1446       | 0.1414       |       2.20%
+DEF        | 0.0516       | 0.0485       |       6.05%
+MID        | 0.1116       | 0.1065       |       4.55%
+FWD        | 0.2876       | 0.2425       |      15.66%
+======================================================================
