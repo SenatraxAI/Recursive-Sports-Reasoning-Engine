@@ -1,68 +1,62 @@
-# Recursive Sports Reasoning Engine (The Council)
+# Recursive Sports Reasoning Engine (RSRE-v1)
 
-> **A Hierarchical AI System for Premier League Tactical Prediction**
-> *Achieved +37.8% ROI in Out-of-Sample Jan 2026 Backtesting.*
+> **Research Prototype | SenatraxAI Research Lab**
+> *A Hierarchical Bayesian System for Tacitcal High-Dimensional Sports Prediction.*
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
-![XGBoost](https://img.shields.io/badge/ML-XGBoost-orange)
-![Streamlit](https://img.shields.io/badge/UI-Streamlit-red)
-
-## 🧠 The Architecture
-
-This is not a simple "stats model". It is a **Compound AI System** that mimics how a human syndicate analyzes a match.
-
-### Layer 1: The Expert System ("System Fit")
-- **Inputs:** Manager Tactics (e.g. "Gegenpress"), Player Physical Exams (DNA).
-- **Logic:** Calculates a `System Compatibility Score` (0.0 - 1.0).
-- **Example:** Determines that *Archie Gray (Leeds)* is a perfect fit for *Daniel Farke's Possession*, but would fail in *Sean Dyche's Low Block*.
-
-### Layer 2: The Tactical Learner (XGBoost)
-- **Inputs:** Formation Density, Central Overload, Width Balance, Team Power Ratings.
-- **Logic:** Predicts raw goal expectancy based on **Tactical Mismatches** (e.g. 4-4-2 vs 3-5-2).
-- **Feature:** Recursive Feature Elimination (RFE) used to identify key tactical drivers.
-
-### Layer 3: The State Management ("The Narrative")
-- **Inputs:** Layer 2 Predictions, Recent Form, Momentum.
-- **Logic:** Classifies the "Game Script":
-    - `DEADLOCK`: High Draw probability, Low Goals.
-    - `CHAOS`: High Variance, End-to-End.
-    - `CONTROL`: One team dominates possession.
-
-### Layer 4: The Calibration Ensemble ("The Council")
-- **The Veteran:** A static model trained on long-term averages (removes bias).
-- **The Scout:** A dynamic recursive model that updates ratings match-by-match (catches streaks).
-- **Output:** A Probability Matrix calibrated via Isotonic Regression.
+[![System Status](https://img.shields.io/badge/System-Active-success)](https://github.com/SenatraxAI/Recursive-Sports-Reasoning-Engine)
+[![Model Architecture](https://img.shields.io/badge/Architecture-Hierarchical_Ensemble-blueviolet)](https://github.com/SenatraxAI/Recursive-Sports-Reasoning-Engine)
+[![Performance](https://img.shields.io/badge/OOS_ROI-%2B37.8%25-brightgreen)](https://github.com/SenatraxAI/Recursive-Sports-Reasoning-Engine)
 
 ---
 
-## � How It Works (Simple Explanation)
-Imagine you are betting on a match, but before you place your money, you consult a **Council of Experts**:
+## 🏗️ System Architecture
 
-1.  **The Scout:** "I've watched every game this month. Newcastle is exhausted and their press is broken."
-2.  **The Tactician:** "Leeds plays a Possession style, which is kryptonite for Newcastle's current formation."
-3.  **The Veteran:** "Historically, home teams with this specific rating advantage win 65% of the time."
+The **Recursive Sports Reasoning Engine (RSRE)** diverges from traditional frequentist models by implementing a **Stateful, Hierarchical Architecture**. It attempts to solve the *Tactical Blindness Problem* inherent in Poisson-based goal models.
 
-The AI acts as the **Chairman**, listening to all these experts. If they argue (e.g., Scout says "Lose", Veteran says "Win"), the AI skips the bet. If they **agree**, it gives you a green light.
+```mermaid
+graph TD
+    A[Raw Match Data] --> B{Layer 1: Semantic Parsing}
+    B -->|Manager Profile| C[Tactical Embedding Space R6]
+    B -->|Player DNA| D[Roast Vector R3]
+    
+    C & D --> E[System Fit Calculator]
+    E --> F{Layer 2: XGBoost Regressors}
+    
+    F -->|Exp Goals| G[Layer 3: Script Classifier]
+    G -->|State: CHAOS/CONTROL| H[Layer 4: The Council]
+    
+    H -->|Static Belief| I[Veteran Agent]
+    H -->|Recursive Belief| J[Scout Agent]
+    
+    I & J --> K[Isotonic Calibration]
+    K --> L[Final Probability Surface]
+```
+
+---
+
+## 🔬 Methodology
+
+### 1. Latent Tactical Embeddings (Manager-Player Fit)
+Traditional models treat teams as static entities. RSRE treats them as dynamic aggregations of **Managerial Demands** and **Player Attributes**.
+We project every manager into a 6-dimensional latent space ($V_M \in \mathbb{R}^6$) representing tactical constraints (e.g., *Verticality*, *Press Intensity*).
+Players are similarly embedded ($V_P \in \mathbb{R}^3$).
+The **System Fit Score** ($\phi$) is derived via a weighted Euclidean distance function:
+$$ \phi(P, M) = \frac{1}{1 + e^{k \cdot || V_P - V_M ||}} $$
+This allows the model to quantify "Tactical Friction" dynamically.
+
+### 2. Recursive Bayesian State Estimation
+The engine maintains a persistent state vector $S_t$ for each team, updated sequentially after every match event $E_t$. Unlike sliding window averages, this recursive filter weighs prediction error ($\delta$) into the update step:
+$$ S_{t+1} = S_t + \eta \cdot \delta_{observed} $$
+This allows the **Scout Agent** to detect regime changes (e.g., "New Manager Bounce" or "Fatigue Collapse") weeks before standard Elo ratings adjust.
+
+### 3. Hierarchical Ensemble (The Council)
+The final decision layer implements a **Mixture of Experts (MoE)** architecture:
+*   **Expert A (The Veteran):** A highly regularized model trained on 5-year priors. High bias, low variance.
+*   **Expert B (The Scout):** A high-sensitivity recursive model. Low bias, high variance.
+*   **Consensus Logic:** The system only executes an action (Bet) when the Jensen-Shannon Divergence between experts is minimized AND the calibrated edge exceeds $\alpha=0.15$.
 
 ---
 
-## 🔬 Technical Deep Dive (The Math)
-This project moves beyond standard "Goal Averages" by implementing **High-Dimensional Vector Mismatches**.
-
-### 1. Vector Space Embedding (The "Fit" Score)
-We map every Manager and Player into a shared latent space ($R^6$):
-$$ \text{Fit}(P, M) = 1.0 - \alpha \cdot || \vec{v}_P - \vec{v}_M || $$
-Where $\vec{v}_P$ is the Player's Attribute Vector (Stamina, Passing, etc.) and $\vec{v}_M$ is the Manager's Requirement Vector. This allows us to quantify "Tactical Friction" even for players who have never played for that manager before.
-
-### 2. Recursive State Estimation
-Unlike static models, this engine processes matches sequentially. The Team Strength $S_t$ at time $t$ is a function of the previous state and the prediction error:
-$$ S_{t+1} = S_t + \eta \cdot (Y_{actual} - Y_{predicted}) $$
-This allows the model to "learn" from a team's over/underperformance in real-time.
-
-### 3. Gradient Boosted Decision Trees (XGBoost)
-We utilize `XGBoost` with **Recursive Feature Elimination (RFE)**. The model learned that heavily engineered features like `central_density_ratio` (3 mid vs 2 mid) are 4x more predictive than simple "Last 5 Games" form.
-
----
 
 ## �🚀 Getting Started
 
