@@ -35,7 +35,36 @@ This is not a simple "stats model". It is a **Compound AI System** that mimics h
 
 ---
 
-## 🚀 Getting Started
+## � How It Works (Simple Explanation)
+Imagine you are betting on a match, but before you place your money, you consult a **Council of Experts**:
+
+1.  **The Scout:** "I've watched every game this month. Newcastle is exhausted and their press is broken."
+2.  **The Tactician:** "Leeds plays a Possession style, which is kryptonite for Newcastle's current formation."
+3.  **The Veteran:** "Historically, home teams with this specific rating advantage win 65% of the time."
+
+The AI acts as the **Chairman**, listening to all these experts. If they argue (e.g., Scout says "Lose", Veteran says "Win"), the AI skips the bet. If they **agree**, it gives you a green light.
+
+---
+
+## 🔬 Technical Deep Dive (The Math)
+This project moves beyond standard "Goal Averages" by implementing **High-Dimensional Vector Mismatches**.
+
+### 1. Vector Space Embedding (The "Fit" Score)
+We map every Manager and Player into a shared latent space ($R^6$):
+$$ \text{Fit}(P, M) = 1.0 - \alpha \cdot || \vec{v}_P - \vec{v}_M || $$
+Where $\vec{v}_P$ is the Player's Attribute Vector (Stamina, Passing, etc.) and $\vec{v}_M$ is the Manager's Requirement Vector. This allows us to quantify "Tactical Friction" even for players who have never played for that manager before.
+
+### 2. Recursive State Estimation
+Unlike static models, this engine processes matches sequentially. The Team Strength $S_t$ at time $t$ is a function of the previous state and the prediction error:
+$$ S_{t+1} = S_t + \eta \cdot (Y_{actual} - Y_{predicted}) $$
+This allows the model to "learn" from a team's over/underperformance in real-time.
+
+### 3. Gradient Boosted Decision Trees (XGBoost)
+We utilize `XGBoost` with **Recursive Feature Elimination (RFE)**. The model learned that heavily engineered features like `central_density_ratio` (3 mid vs 2 mid) are 4x more predictive than simple "Last 5 Games" form.
+
+---
+
+## �🚀 Getting Started
 
 ### Prerequisites
 *   Python 3.10+
